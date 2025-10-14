@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 from pydantic import DirectoryPath, PostgresDsn, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -76,3 +77,8 @@ def get_settings():
 
 
 settings = get_settings()
+
+
+app_configs: dict[str, Any] = {"title": "App API"}
+if settings.ENVIRONMENT.is_deployed:
+    app_configs["root_path"] = f"/v{settings.APP_VERSION}"
