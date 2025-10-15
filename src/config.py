@@ -1,8 +1,7 @@
 from functools import lru_cache
-from pathlib import Path
 from typing import Any
 
-from pydantic import DirectoryPath, PostgresDsn, model_validator
+from pydantic import PostgresDsn, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.constants import Environment
@@ -24,9 +23,6 @@ class Config(CustomBaseSettings):
     DATABASE_POOL_SIZE: int = 16
     DATABASE_POOL_TTL: int = 60 * 20  # 20 minutes
     DATABASE_POOL_PRE_PING: bool = True
-
-    BASE_DIR: DirectoryPath = Path(__file__).resolve().parent.parent
-    TEMPLATES_DIR: DirectoryPath = BASE_DIR / "src" / "templates"
 
     ENVIRONMENT: Environment = Environment.PRODUCTION
 
