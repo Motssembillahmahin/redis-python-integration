@@ -9,7 +9,7 @@ from src.config import settings
 from src.constants import DB_NAMING_CONVENTION
 
 
-from redis import asyncio as aioredis
+from redis.asyncio import Redis
 
 
 DATABASE_URL = str(settings.DATABASE_URL)
@@ -28,13 +28,13 @@ def get_db() -> Generator[Session]:
         db.close()
 
 
-edis_pool: aioredis.Redis | None = None
+redis_pool: Redis | None = None
 
 
 async def init_redis_pool():
     """Initialize Redis connection pool - call at app startup"""
     global redis_pool
-    redis_pool = await aioredis.from_url(
+    redis_pool = Redis.from_url(
         REDIS_URL,
         encoding="utf-8",
         decode_responses=True,
@@ -43,18 +43,23 @@ async def init_redis_pool():
         socket_keepalive=True,
     )
     await redis_pool.ping()
-    print("Redis pool initialized")
+    print("Redis connected")
 
 
 async def close_redis_pool():
     """Close Redis connection pool - call at app shutdown"""
     global redis_pool
     if redis_pool:
-        await redis_pool.close()
+        await redis_pool.aclose()
         print("Redis pool closed")
 
 
-async def get_redis() -> AsyncGenerator[aioredis.Redis, None]:
+async def get_redis() -> AsyncGenerator[Redis, None]:
     if redis_pool is None:
-        raise RuntimeError("Redis not initialized. Call init_redis_pool() at startup")
-    yield redis_pool
+        raise RuntimeError(
+            "Redis pool not initialized. Call init_redis_pool() at startup"
+        )
+    try:
+        yield redis_pool
+    finally:
+        pass
